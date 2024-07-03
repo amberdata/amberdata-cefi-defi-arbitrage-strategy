@@ -1,0 +1,43 @@
+name: Dependabot Security Updates
+on:
+  pull_request:
+    branches:
+    - main
+    - master
+jobs:
+  notify:
+    if: startsWith(github.head_ref, 'dependabot/')
+    name: Notify Slack
+    uses: amberdata/cicd/.github/workflows/notify-slack.yaml@v2.8.0
+    with:
+      slack_webhook_url_secret_name: /production/0001/vulnerability-scanning/slack-webhook-url
+      slack_payload: |
+        {
+          "blocks": [
+            {
+              "type": "header",
+              "text": {
+                "type": "plain_text",
+                "text": "Dependabot Security Updates"
+              }
+            },
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "*Repository Name:*\n${{ github.event.repository.name }}"
+              }
+            },
+            {
+              "type": "section",
+              "fields": [
+                {
+                  "type": "mrkdwn",
+                  "text": "*Security update available:*\n*<${{ github.event.pull_request.html_url }}|Pull Request>*"
+                }
+              ]
+            }
+          ]
+        }
+    secrets:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
